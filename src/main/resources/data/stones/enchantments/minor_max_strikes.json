@@ -1,0 +1,10 @@
+{
+  "type": "MINOR",
+  "name": "DICT:rune.stones_ef_bridge.max_strikes_minor.name",
+  "description": "DICT:rune.stones_ef_bridge.max_strikes_minor.desc",
+  "icon": "minecraft:textures/item/iron_axe.png",
+  "attribute": "epicfight:max_strikes",
+  "operation": "ADDITION",
+  "factor": 0.05,
+  "required_level": 1
+}

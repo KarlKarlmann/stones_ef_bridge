@@ -1,0 +1,10 @@
+{
+  "type": "MAJOR",
+  "name": "DICT:rune.stones_ef_bridge.impact_major.name",
+  "description": "DICT:rune.stones_ef_bridge.impact_major.desc",
+  "icon": "minecraft:textures/item/iron_mace.png",
+  "attribute": "epicfight:impact",
+  "operation": "ADDITION",
+  "factor": 0.6,
+  "required_level": 1
+}

@@ -1,0 +1,10 @@
+{
+  "type": "MAJOR",
+  "name": "DICT:rune.stones_ef_bridge.armor_negation_major.name",
+  "description": "DICT:rune.stones_ef_bridge.armor_negation_major.desc",
+  "icon": "minecraft:textures/item/diamond_sword.png",
+  "attribute": "epicfight:armor_negation",
+  "operation": "ADDITION",
+  "factor": 0.2,
+  "required_level": 1
+}

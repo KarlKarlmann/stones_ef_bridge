@@ -1,0 +1,22 @@
+{
+  "tooltip.stones_apoth.header": "Apotheosis Integration",
+  "tooltip.stones_apoth.level_req": "Benötigtes Runestone-Level: %s",
+  "tooltip.stones_apoth.active_effect": "Aktiver Bonus:",
+  "rune.stones_ef_bridge.max_strikes_minor.desc": "Erhöht die maximale Anzahl an Zielen, die du mit einem einzigen Waffenschwung treffen kannst.",
+  "rune.stones_ef_bridge.armor_negation_major.name": "Rune des großen Wahren Schlags",
+  "rune.stones_ef_bridge.armor_negation_major.desc": "Durchdringt gegnerische Rüstung.",
+  "rune.stones_ef_bridge.armor_negation_minor.name": "Rune des Wahren Schlags",
+  "rune.stones_ef_bridge.armor_negation_minor.desc": "Durchdringt gegnerische Rüstung.",
+  "rune.stones_ef_bridge.impact_major.name": "Rune des großen Einschlags",
+  "rune.stones_ef_bridge.impact_major.desc": "Erhöht deinen Einschlag massiv, wodurch gegnerische Deckungen leichter durchbrochen werden.",
+  "rune.stones_ef_bridge.impact_minor.name": "Rune des Einschlags",
+  "rune.stones_ef_bridge.impact_minor.desc": "Erhöht deinen Basis-Einschlag, wodurch gegnerische Deckungen leichter durchbrochen werden.",
+  "rune.stones_ef_bridge.weight_major.name": "Rune der großen Feder",
+  "rune.stones_ef_bridge.weight_major.desc": "Reduziert dein Ausrüstungsgewicht massiv.",
+  "rune.stones_ef_bridge.weight_minor.name": "Rune der Feder",
+  "rune.stones_ef_bridge.weight_minor.desc": "Reduziert dein Ausrüstungsgewicht, was Angriffsgeschwindigkeit und Ausdauerverbrauch verbessert.",
+  "rune.stones_ef_bridge.stamina_regen_major.name": "Rune des großen Atems",
+  "rune.stones_ef_bridge.stamina_regen_major.desc": "Erhöht deine Ausdauer-Regeneration extrem.",
+  "rune.stones_ef_bridge.stamina_regen_minor.name": "Rune des endlosen Atems",
+  "rune.stones_ef_bridge.stamina_regen_minor.desc": "Erhöht deine Ausdauer-Regeneration spürbar."
+}

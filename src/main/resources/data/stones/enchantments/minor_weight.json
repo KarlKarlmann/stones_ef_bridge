@@ -1,0 +1,10 @@
+{
+  "type": "MINOR",
+  "name": "DICT:rune.stones_ef_bridge.weight_minor.name",
+  "description": "DICT:rune.stones_ef_bridge.weight_minor.desc",
+  "icon": "minecraft:textures/item/feather.png",
+  "attribute": "epicfight:weight",
+  "operation": "ADDITION",
+  "factor": -0.5,
+  "required_level": 1
+}

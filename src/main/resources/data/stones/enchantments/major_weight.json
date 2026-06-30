@@ -1,0 +1,10 @@
+{
+  "type": "MAJOR",
+  "name": "DICT:rune.stones_ef_bridge.weight_major.name",
+  "description": "DICT:rune.stones_ef_bridge.weight_major.desc",
+  "icon": "minecraft:textures/item/feather.png",
+  "attribute": "epicfight:weight",
+  "operation": "ADDITION",
+  "factor": -3.0,
+  "required_level": 1
+}

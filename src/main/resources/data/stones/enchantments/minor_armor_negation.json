@@ -1,0 +1,10 @@
+{
+  "type": "MINOR",
+  "name": "DICT:rune.stones_ef_bridge.armor_negation_minor.name",
+  "description": "DICT:rune.stones_ef_bridge.armor_negation_minor.desc",
+  "icon": "minecraft:textures/item/diamond_sword.png",
+  "attribute": "epicfight:armor_negation",
+  "operation": "ADDITION",
+  "factor": 0.4,
+  "required_level": 1
+}

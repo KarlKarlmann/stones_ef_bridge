@@ -1,0 +1,34 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="CC BY-NC 4.0"
+
+[[mods]]
+modId="stones_ef_bridge"
+displayName="Stones: Epic Fight Integration by Karl Karlmann"
+authors="Karl Karlmann"
+version="${version}"
+logoFile="stones_ef_bridge.png"
+description='''
+This addon replaces Epic Fight's default skill progression with the progression system from Stones.
+'''
+
+[[dependencies.stones_ef_bridge]]
+    modId="forge"
+    mandatory=true
+    versionRange="[47,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.stones_ef_bridge]]
+    modId="stones"
+    mandatory=true
+    versionRange="[1.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.stones_ef_bridge]]
+    modId="epicfight"
+    mandatory=true
+    versionRange="[7.4.0,)"
+    ordering="AFTER"
+    side="BOTH"

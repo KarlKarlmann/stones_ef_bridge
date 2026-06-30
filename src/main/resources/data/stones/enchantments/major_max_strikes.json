@@ -1,0 +1,10 @@
+{
+  "type": "MAJOR",
+  "name": "DICT:rune.stones_ef_bridge.max_strikes_major.name",
+  "description": "DICT:rune.stones_ef_bridge.max_strikes_major.desc",
+  "icon": "minecraft:textures/item/iron_axe.png",
+  "attribute": "epicfight:max_strikes",
+  "operation": "ADDITION",
+  "factor": 0.2,
+  "required_level": 3
+}

@@ -1,0 +1,10 @@
+{
+  "type": "MAJOR",
+  "name": "DICT:rune.stones_ef_bridge.stamina_regen_major.name",
+  "description": "DICT:rune.stones_ef_bridge.stamina_regen_major.desc",
+  "icon": "minecraft:textures/item/phantom_membrane.png",
+  "attribute": "epicfight:stamina_regen",
+  "operation": "ADDITION",
+  "factor": 1.5,
+  "required_level": 1
+}
