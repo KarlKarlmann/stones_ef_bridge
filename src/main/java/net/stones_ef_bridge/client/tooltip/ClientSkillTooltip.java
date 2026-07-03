@@ -33,17 +33,19 @@ public class ClientSkillTooltip implements ClientTooltipComponent, TooltipCompon
     private static final int IMAGE_SIZE = 84;      // Quadratische Bildgröße
     private static final int CARD_PADDING = 6;     // Äußerer Abstand der Elemente
 
-    public ClientSkillTooltip(String skillRegistryName, ItemStack stack) {
+	public ClientSkillTooltip(String skillRegistryName, ItemStack stack) {
         this.skillRegistryName = skillRegistryName;
         this.currentCount = stack.getCount();
         
-        ResourceLocation id = new ResourceLocation(skillRegistryName);
         Skill skill = SkillManager.getSkill(skillRegistryName);
         ResourceLocation baseTexture;
 
         if (skill != null) {
+            // Sicher: Das holt das Bild exakt da ab, wo der Addon-Macher es registriert hat
             baseTexture = skill.getSkillTexture();
         } else {
+            // Nur falls der Skill wirklich nicht existiert
+            ResourceLocation id = new ResourceLocation(skillRegistryName);
             baseTexture = new ResourceLocation(id.getNamespace(), "textures/gui/skills/" + id.getPath() + ".png");
         }
 
@@ -187,8 +189,17 @@ public class ClientSkillTooltip implements ClientTooltipComponent, TooltipCompon
      * Prüft, ob ein spezifischer Eintrag existiert. Wenn nicht, wird deterministisch
      * einer von 10 generischen Stones-EF-Lore-Einträgen zugewiesen.
      */
-    private Component getFlavorTextComponent() {
-        ResourceLocation id = new ResourceLocation(this.skillRegistryName);
+	private Component getFlavorTextComponent() {
+        Skill skill = SkillManager.getSkill(this.skillRegistryName);
+        ResourceLocation id;
+        
+        // Sicherer Weg: Die echte, registrierte Location aus dem Skill holen!
+        if (skill != null && skill.getRegistryName() != null) {
+            id = skill.getRegistryName();
+        } else {
+            // Nur als absoluter Notfall-Fallback
+            id = new ResourceLocation(this.skillRegistryName);
+        }
         
         // Spezifischer Translation-Key, z.B.: flavor.stones_ef_bridge.epicfight.roll.text
         String specificKey = "flavor.stones_ef_bridge." + id.getNamespace() + "." + id.getPath() + ".text";

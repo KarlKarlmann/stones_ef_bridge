@@ -120,15 +120,21 @@ public class StonesEfEventHandler {
         }
     }
 
-    public static boolean handleInventoryCrafting(Player player, ItemStack runeStack, ItemStack bookStack, Slot slot, SlotAccess cursorAccess) {
+public static boolean handleInventoryCrafting(Player player, ItemStack runeStack, ItemStack bookStack, Slot slot, SlotAccess cursorAccess) {
         if (player.level().isClientSide) return true;
 
-        if (bookStack.getTag() == null || !bookStack.getTag().contains("skill")) {
+        // 1. Hole den Skill direkt und zu 100% verlässlich über die Epic Fight API!
+        // Das behebt sofort alle Probleme mit fehlenden Namespaces in NBT-Tags.
+        Skill skill = yesman.epicfight.world.item.SkillBookItem.getContainSkill(bookStack);
+        
+        if (skill == null || skill.getRegistryName() == null) {
+            // Kein gültiges Skill-Buch
             return false;
         }
 
-        String skillRegistryName = bookStack.getTag().getString("skill");
-        ResourceLocation skillRes = new ResourceLocation(skillRegistryName);
+        // 2. Extrahiere die absolut korrekte ResourceLocation direkt aus dem registrierten Skill
+        ResourceLocation skillRes = skill.getRegistryName();
+        String skillRegistryName = skillRes.toString(); // z.B. "epicfight:roll" oder "addon:cool_skill"
         
         ResourceLocation targetEnchKey = new ResourceLocation(StonesEfBridge.MODID, skillRes.getNamespace() + "_" + skillRes.getPath());
         Enchantment targetEnchantment = ForgeRegistries.ENCHANTMENTS.getValue(targetEnchKey);
@@ -227,7 +233,7 @@ public class StonesEfEventHandler {
             world.sendParticles(ParticleTypes.FLAME, player.getX(), player.getY() + 1.0, player.getZ(), 20, 0.3, 0.3, 0.3, 0.05);
         }
 
-        Component skillNameComp = Component.translatable("epicfight.skill." + skillRes.getPath()).withStyle(ChatFormatting.GOLD);
+		Component skillNameComp = Component.translatable("skill." + skillRes.getNamespace() + "." + skillRes.getPath()).withStyle(ChatFormatting.GOLD);
         player.displayClientMessage(Component.translatable("message.stones_ef_bridge.rune_resonated", skillNameComp).withStyle(ChatFormatting.GREEN), true);
 
         if (massiveBloatOccurred) {

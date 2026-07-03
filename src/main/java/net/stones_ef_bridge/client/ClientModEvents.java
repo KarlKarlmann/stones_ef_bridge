@@ -45,22 +45,29 @@ public class ClientModEvents {
      * und ersetzt sie exklusiv durch unsere immersive Divination Card mit dynamischem Flavor-Text.
      */
 	@SubscribeEvent
-    public static void onGatherTooltipComponents(RenderTooltipEvent.GatherComponents event) {
-        ItemStack stack = event.getItemStack();
-        
-        if (stack.getItem() instanceof SkillBookItem && stack.getTag() != null && stack.getTag().contains("skill")) {
-            String skillId = stack.getTag().getString("skill");
-            var elements = event.getTooltipElements();
+		public static void onGatherTooltipComponents(RenderTooltipEvent.GatherComponents event) {
+			ItemStack stack = event.getItemStack();
+			
+			if (stack.getItem() instanceof SkillBookItem) {
+				// Epic Fight API nutzen, anstatt NBT manuell zu prüfen!
+				yesman.epicfight.skill.Skill skill = SkillBookItem.getContainSkill(stack);
+				
+				if (skill != null && skill.getRegistryName() != null) {
+					// Das gibt uns IMMER den echten Namespace, z.B. "epicfight:roll" oder "addon:skill"
+					String safeSkillId = skill.getRegistryName().toString();
+					
+					var elements = event.getTooltipElements();
 
-            // 1. Alle originalen Unterzeilen verwerfen (Index 0 ist der Name des Buchs, den behalten wir!)
-            if (elements.size() > 1) {
-                elements.subList(1, elements.size()).clear();
-            }
+					// 1. Alle originalen Unterzeilen verwerfen (Index 0 ist der Name des Buchs, den behalten wir!)
+					if (elements.size() > 1) {
+						elements.subList(1, elements.size()).clear();
+					}
 
-            // 2. Unsere Divination Card als einzige visuelle Komponente direkt unter dem Namen einbetten
-            elements.add(1, Either.right(new ClientSkillTooltip(skillId, stack)));
-        }
-    }
+					// 2. Unsere Divination Card mit dem sicheren String initialisieren
+					elements.add(1, Either.right(new ClientSkillTooltip(safeSkillId, stack)));
+				}
+			}
+		}
 
     /**
      * Registrierung auf dem MOD-Bus.
@@ -68,22 +75,28 @@ public class ClientModEvents {
     @Mod.EventBusSubscriber(modid = StonesEfBridge.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ModBusEvents {
 
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event) {
-            event.enqueueWork(() -> {
-                Item skillBook = ForgeRegistries.ITEMS.getValue(new ResourceLocation("epicfight", "skillbook"));
-                if (skillBook != null) {
-                    ItemProperties.register(skillBook, new ResourceLocation(StonesEfBridge.MODID, "variant"), (stack, level, entity, seed) -> {
-                        if (stack.getTag() != null && stack.getTag().contains("skill")) {
-                            String skillId = stack.getTag().getString("skill");
-                            int hash = Math.abs(skillId.hashCode());
-                            return (float) (hash % totalVariants);
-                        }
-                        return 0.0F;
-                    });
-                }
-            });
-        }
+		@SubscribeEvent
+		public static void onClientSetup(FMLClientSetupEvent event) {
+			event.enqueueWork(() -> {
+				Item skillBook = ForgeRegistries.ITEMS.getValue(new ResourceLocation("epicfight", "skillbook"));
+				if (skillBook != null) {
+					ItemProperties.register(skillBook, new ResourceLocation(StonesEfBridge.MODID, "variant"), (stack, level, entity, seed) -> {
+						
+						if (stack.getItem() instanceof SkillBookItem) {
+							yesman.epicfight.skill.Skill skill = SkillBookItem.getContainSkill(stack);
+							
+							if (skill != null && skill.getRegistryName() != null) {
+								// Sicheren String für den konstanten Hash nutzen
+								String safeSkillId = skill.getRegistryName().toString();
+								int hash = Math.abs(safeSkillId.hashCode());
+								return (float) (hash % totalVariants);
+							}
+						}
+						return 0.0F;
+					});
+				}
+			});
+		}
 
         @SubscribeEvent
         public static void onRegisterItemDecorations(RegisterItemDecorationsEvent event) {
