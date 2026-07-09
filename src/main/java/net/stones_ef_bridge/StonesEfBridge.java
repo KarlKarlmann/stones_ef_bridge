@@ -4,9 +4,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.stones_ef_bridge.compat.EpicSkillsCompat;
 import net.stones_ef_bridge.events.StonesEfEventHandler;
 import net.stones_ef_bridge.network.StonesNetwork;
 import org.apache.logging.log4j.LogManager;
@@ -19,9 +17,6 @@ public class StonesEfBridge {
 
     public StonesEfBridge() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-
-        // Registrieren der Config-Spezifikation (Gilt synchron für Server und Client)
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, EpicSkillsCompat.SPEC);
 
         // Registrieren des Netzwerk-Kanals
         StonesNetwork.register();

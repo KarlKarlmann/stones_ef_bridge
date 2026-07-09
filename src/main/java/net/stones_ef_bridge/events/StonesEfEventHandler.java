@@ -22,8 +22,8 @@ import net.minecraftforge.registries.RegisterEvent;
 import net.stones.enchantment.RuneEnchantment;
 import net.stones.logic.RuneCalculator;
 import net.stones_ef_bridge.StonesEfBridge;
-import net.stones_ef_bridge.compat.EpicSkillsCompat;
 import net.stones_ef_bridge.util.SkillRarityManager;
+import net.stones_ef_bridge.util.SkillConfigManager;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.api.forgeevent.SkillBuildEvent;
 import net.minecraftforge.fml.ModLoader;
@@ -38,37 +38,68 @@ import java.util.stream.Collectors;
 @Mod.EventBusSubscriber(modid = StonesEfBridge.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class StonesEfEventHandler {
 
-    @SubscribeEvent
-	public static void onRegisterEnchantments(RegisterEvent event) {
-		if (event.getRegistryKey().equals(ForgeRegistries.Keys.ENCHANTMENTS)) {
-			StonesEfBridge.LOGGER.info("[Stones-EF-Bridge] Generiere dynamische Runen-Verzauberungen...");
+    // --- NEU: Eigene Unterklasse, die die originale Skill-ID sicher speichert ---
+    public static class EpicFightRune extends RuneEnchantment {
+        private final ResourceLocation originalSkillId;
+
+        public EpicFightRune(String displayName, String desc, String iconPath, float baseReq, ResourceLocation originalSkillId) {
+            super(
+                Type.MILESTONE,
+                (Attribute) null,
+                null,
+                0.0,
+                displayName,
+                desc,
+                iconPath,
+                baseReq,
+                false
+            );
+            this.originalSkillId = originalSkillId;
+        }
+
+        public ResourceLocation getOriginalSkillId() {
+            return this.originalSkillId;
+        }
+
+        @Override
+        public void sleep() {
+            // IMMUNITÄT: Diese programmatische Epic Fight Rune blockiert den "sleep()" Befehl!
+            // Dadurch wird sie weder vom Server Datapack-Reload noch vom Client Sync-Paket ausradiert 
+            // und fällt niemals in den Status "Erloschene Resonanz" zurück.
+        }
+    }
+
+	@SubscribeEvent
+    public static void onRegisterEnchantments(RegisterEvent event) {
+        if (event.getRegistryKey().equals(ForgeRegistries.Keys.ENCHANTMENTS)) {
+            StonesEfBridge.LOGGER.info("[Stones-EF-Bridge] Generiere dynamische Runen-Verzauberungen...");
 
             List<ResourceLocation> skillsToRegister = new ArrayList<>();
+            List<Skill> allExtractedSkills = new ArrayList<>();
 
-            // 1. Hole ALLE Skills, indem wir Epic Fights eigenes SkillBuildEvent VORZEITIG manuell feuern!
+            // 1. Hole ALLE Skills
             try {
                 SkillBuildEvent skillBuildEvent = new SkillBuildEvent();
                 ModLoader.get().postEvent(skillBuildEvent);
                 
-                for (Skill skill : skillBuildEvent.getAllSkills()) {
+                allExtractedSkills.addAll(skillBuildEvent.getAllSkills());
+                
+                for (Skill skill : allExtractedSkills) {
                     if (skill.getRegistryName() != null) {
                         skillsToRegister.add(skill.getRegistryName());
                     }
                 }
-                StonesEfBridge.LOGGER.info("[Stones-EF-Bridge] {} Skills erfolgreich durch SkillBuildEvent extrahiert!", skillsToRegister.size());
             } catch (Exception e) {
                 StonesEfBridge.LOGGER.error("[Stones-EF-Bridge] Fehler beim Vorab-Laden der Epic Fight Skills", e);
             }
 
-            // 2. Erweitere um alle Addon-Skills, die der Spieler in der Config hinterlegt hat!
+            // NEU: Initialisiere die Config und hänge alle gefundenen Skills als Kommentar an!
+            SkillConfigManager.initIfNeeded(allExtractedSkills);
+
+            // 2. Erweitere um alle Addon-Skills aus unserer .cfg Datei!
             try {
-                if (EpicSkillsCompat.CUSTOM_RARITIES != null && EpicSkillsCompat.CUSTOM_RARITIES.get() != null) {
-                    for (String entry : EpicSkillsCompat.CUSTOM_RARITIES.get()) {
-                        String[] parts = entry.split("=");
-                        if (parts.length >= 1) {
-                            skillsToRegister.add(new ResourceLocation(parts[0].trim()));
-                        }
-                    }
+                for (String configSkillId : SkillConfigManager.getActiveConfig().keySet()) {
+                    skillsToRegister.add(new ResourceLocation(configSkillId));
                 }
             } catch (Exception e) {
                 StonesEfBridge.LOGGER.error("[Stones-EF-Bridge] Fehler beim Lesen der Custom Rarities", e);
@@ -78,34 +109,23 @@ public class StonesEfEventHandler {
             List<ResourceLocation> uniqueSkills = skillsToRegister.stream().distinct().collect(Collectors.toList());
 
 			for (ResourceLocation skillId : uniqueSkills) {
+				try {
                 String registryName = skillId.getNamespace() + "_" + skillId.getPath();
 				String displayName = "DICT:skill." + skillId.getNamespace() + "." + skillId.getPath();
 				String desc = "DICT:skill." + skillId.getNamespace() + "." + skillId.getPath() + ".tooltip";
 
 				int cardsRequired = SkillRarityManager.getCardCost(skillId.toString());
 				float baseReq = cardsRequired <= 3 ? 1.0f : (cardsRequired <= 5 ? 2.0f : (cardsRequired <= 8 ? 3.0f : 4.0f));
+                String iconPath = skillId.getNamespace() + ":textures/gui/skills/" + skillId.getPath() + ".png";
 
-				RuneEnchantment dynamicSkillRune = new RuneEnchantment(
-					RuneEnchantment.Type.MILESTONE,
-					(Attribute) null,
-					null,
-					0.0,
-					displayName,
-					desc,
-					skillId.getNamespace() + ":textures/gui/skills/" + skillId.getPath() + ".png",
-					baseReq, 
-					false  
-				) {
-                    @Override
-                    public void sleep() {
-                        // IMMUNITÄT: Diese programmatische Epic Fight Rune blockiert den "sleep()" Befehl!
-                        // Dadurch wird sie weder vom Server Datapack-Reload noch vom Client Sync-Paket ausradiert 
-                        // und fällt niemals in den Status "Erloschene Resonanz" zurück.
-                    }
-                };
-
+                // Nutze nun unsere massgeschneiderte Klasse statt der anonymen Instanz!
+                EpicFightRune dynamicSkillRune = new EpicFightRune(displayName, desc, iconPath, baseReq, skillId);
                 dynamicSkillRune.setMaxLevel(10);
+                
                 event.register(ForgeRegistries.Keys.ENCHANTMENTS, new ResourceLocation(StonesEfBridge.MODID, registryName), () -> dynamicSkillRune);
+				} catch (Exception e) {
+					StonesEfBridge.LOGGER.error("[Stones-EF-Bridge] Fehler beim Registrieren von Skill {}", skillId, e);
+				}
             }
             
             StonesEfBridge.LOGGER.info("[Stones-EF-Bridge] Erfolgreich {} dynamische Runen-Verzauberungen registriert!", uniqueSkills.size());
@@ -120,7 +140,7 @@ public class StonesEfEventHandler {
         }
     }
 
-public static boolean handleInventoryCrafting(Player player, ItemStack runeStack, ItemStack bookStack, Slot slot, SlotAccess cursorAccess) {
+    public static boolean handleInventoryCrafting(Player player, ItemStack runeStack, ItemStack bookStack, Slot slot, SlotAccess cursorAccess) {
         if (player.level().isClientSide) return true;
 
         // 1. Hole den Skill direkt und zu 100% verlässlich über die Epic Fight API!

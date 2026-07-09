@@ -2,7 +2,6 @@ package net.stones_ef_bridge.util;
 
 import net.minecraft.world.entity.player.Player;
 import net.stones_ef_bridge.StonesEfBridge;
-import net.stones_ef_bridge.compat.EpicSkillsCompat;
 import yesman.epicfight.skill.Skill;
 import net.minecraft.resources.ResourceLocation;
 
@@ -64,24 +63,15 @@ public class SkillRarityManager {
         return new HashMap<>(CONFIG_CACHE);
     }
 
-    private static void rebuildCache() {
+	private static void rebuildCache() {
         CONFIG_CACHE.clear();
         try {
-            if (EpicSkillsCompat.CUSTOM_RARITIES != null && EpicSkillsCompat.CUSTOM_RARITIES.get() != null) {
-                for (String entry : EpicSkillsCompat.CUSTOM_RARITIES.get()) {
-                    try {
-                        String[] parts = entry.split("=");
-                        if (parts.length == 2) {
-                            String skillName = parts[0].trim().toLowerCase();
-                            int cardCount = Integer.parseInt(parts[1].trim());
-                            cardCount = Math.max(1, Math.min(64, cardCount));
-                            CONFIG_CACHE.put(skillName, cardCount);
-                        }
-                    } catch (Exception e) {
-                        StonesEfBridge.LOGGER.error("[Stones-EF-Bridge] Fehler beim Parsen des Config-Eintrags: " + entry, e);
-                    }
-                }
-            }
+            // Lade die aktuelle Config aus unserer .cfg Datei
+            SkillConfigManager.loadConfig();
+            
+            // Übernimm alle aktiven Einträge in den Cache
+            CONFIG_CACHE.putAll(SkillConfigManager.getActiveConfig());
+            
         } catch (Throwable t) {
             StonesEfBridge.LOGGER.error("[Stones-EF-Bridge] Fehler beim Laden der Seltenheits-Config!", t);
         }
